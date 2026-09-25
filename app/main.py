@@ -16,10 +16,19 @@ from app.database import Base, engine, SessionLocal
 from app.models import Habit
 
 
-app = Flask(__name__)
+# Flask sucht standardmaessig im Verzeichnis von main.py nach
+# templates/ und static/. Da unsere Ordner aber im Projekt-Root
+# liegen (eine Ebene hoeher), muessen wir den Pfad explizit setzen.
+# Sonst gibt's "TemplateNotFound: index.html".
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+app = Flask(
+    __name__,
+    template_folder=os.path.join(BASE_DIR, "templates"),
+    static_folder=os.path.join(BASE_DIR, "static"),
+)
 
 # Beim Start die Tabellen anlegen, falls sie noch nicht existieren.
-# Fuer den PoC reicht das, spaeter wuerde man Alembic-Migrationen nutzen.
 Base.metadata.create_all(bind=engine)
 
 
@@ -29,7 +38,8 @@ def index():
     db = SessionLocal()
     try:
         habits = db.query(Habit).order_by(Habit.created_at.desc()).all()
-        return render_template("index.html", habits=habits)
+        # today wird im Template gebraucht, um den Done-Status anzuzeigen.
+        return render_template("index.html", habits=habits, today=date.today())
     finally:
         db.close()
 
