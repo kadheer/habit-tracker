@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Habit Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Habit Tracker</h1>
+            <p class="subtitle">Bau dir gute Gewohnheiten auf.</p>
+        </header>
+
+        <form action="/habits" method="post" class="add-form">
+            <input
+                type="text"
+                name="name"
+                placeholder="Neuer Habit, z.B. '30 Min lesen'"
+                maxlength="100"
+                required
+                autofocus
+            >
+            <button type="submit">Hinzufuegen</button>
+        </form>
+
+        {% if habits %}
+        <ul class="habit-list">
+            {% for habit in habits %}
+            <li class="habit {% if habit.last_done == today %}done{% endif %}">
+                <div class="habit-info">
+                    <span class="habit-name">{{ habit.name }}</span>
+                    {% if habit.streak > 0 %}
+                        <span class="streak">
+                            🔥 {{ habit.streak }} Tag{% if habit.streak != 1 %}e{% endif %}
+                        </span>
+                    {% endif %}
+                </div>
+                <form action="/habits/{{ habit.id }}/done" method="post">
+                    <button type="submit" class="done-btn">
+                        {% if habit.last_done == today %}
+                            ✓ Heute erledigt
+                        {% else %}
+                            Abhaken
+                        {% endif %}
+                    </button>
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="empty">
+            Noch keine Habits. Leg den ersten an!
+        </p>
+        {% endif %}
+    </div>
+</body>
+</html>
